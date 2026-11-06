@@ -20,6 +20,9 @@ venv/
 !checkpoints/qwen_math_lora/**
 
 
+# User local chat logs
+chat_history.md
+
 # Data cache
 data/
 *.raw

@@ -89,7 +89,7 @@ python3 train_1b_math.py --max_samples 3000
 ```bash
 python3 chat.py --model Qwen/Qwen2.5-1.5B-Instruct
 ```
-All chat logs are automatically appended to `chat_history.md`.
+All chat logs are automatically recorded locally into `chat_history.md`. A sample testing transcript is available in `examples/sample_chat_transcript.md`.
 
 ---
 
@@ -103,6 +103,8 @@ FirstLLM/
 │   ├── best_model.pt          # Scratch Mini-GPT weights
 │   ├── chat_lora/             # SmolLM2 135M LoRA adapter
 │   └── qwen_math_lora/        # Qwen 1.5B Math LoRA adapter
+├── examples/
+│   └── sample_chat_transcript.md # Recorded testing transcript
 ├── data.py                    # Tokenizer & data preparation
 ├── model.py                   # PyTorch Transformer architecture
 ├── train.py                   # Scratch pre-training engine
@@ -110,7 +112,6 @@ FirstLLM/
 ├── finetune_chat.py           # LoRA instruction fine-tuning
 ├── train_1b_math.py           # 1.5B scaling with MetaMathQA
 ├── chat.py                    # Interactive terminal chatbot
-├── chat_history.md            # Recorded conversation logs
 └── requirements.txt           # Python dependencies
 ```
 
