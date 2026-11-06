@@ -1,8 +1,20 @@
 # FirstLLM
 
-> **From Zero Knowledge to 1.5B Parameter Model Training on Cloud GPUs for < \$0.15**
+> ### ⚡ Total Project Spend: **\$0.22 USD**
+> **From Zero Knowledge to Pre-Training & Scaling a 1.5B Parameter Model on Cloud GPUs for just \$0.22**
 
 A comprehensive, hands-on repository demonstrating how to build, pre-train, fine-tune, and evaluate Generative Transformer Language Models (LLMs) from scratch and scale them to 1.5B parameters using PyTorch, LoRA, and real internet datasets.
+
+---
+
+## 💰 Total Cost & Hardware Profile
+
+> ### **Grand Total Spent: \$0.22 USD**
+> Every experiment in this repository—building and pre-training a Transformer from scratch, instruction fine-tuning, and scaling to a 1.5 Billion parameter model on an RTX 5070—was executed for a **total cost of \$0.22**.
+
+* **Total Cost:** **\$0.22 USD** (All training, fine-tuning & evaluation runs)
+* **Compute Provider:** OctaSpace (Decentralized Cloud)
+* **GPU:** NVIDIA GeForce RTX 5070 (12.34 GB VRAM, Blackwell Architecture)
 
 ---
 
@@ -15,16 +27,6 @@ A comprehensive, hands-on repository demonstrating how to build, pre-train, fine
 - Trained in 2.79 mins (Loss: 1.56)   - LoRA (PEFT) in 45 seconds             - Gradient Checkpointing (5 GB VRAM)
 - Generates Shakespearean verse       - Interactive Terminal Chat             - Tested on JEE Advanced Calculus
 ```
-
----
-
-## Hardware & Cost Profile
-
-* **Compute Provider:** OctaSpace (Decentralized Cloud)
-* **GPU:** NVIDIA GeForce RTX 5070 (12.34 GB VRAM, Blackwell Architecture)
-* **Starting Budget:** \$2.31
-* **Total Spent:** ~\$0.12 across all experiments
-* **Remaining Balance:** ~\$2.19
 
 ---
 
