@@ -1,38 +1,45 @@
 import os
+import argparse
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-BASE_MODEL = "HuggingFaceTB/SmolLM2-135M"
+DEFAULT_MODEL = "HuggingFaceTB/SmolLM2-135M-Instruct"
 LORA_PATH = "checkpoints/chat_lora"
 
-def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"-> Loading chatbot on {device}...")
-    
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
+def parse_args():
+    parser = argparse.ArgumentParser(description="Chat with FirstLLM")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="Model ID")
+    parser.add_argument("--use_lora", action="store_true", help="Attach custom LoRA adapter")
+    return parser.parse_args()
 
+def main():
+    args = parse_args()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"-> Loading chatbot: {args.model} on {device}...")
+    
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
     dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-    base = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL,
+    
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model,
         torch_dtype=dtype,
         device_map=device
     )
 
-    if os.path.exists(LORA_PATH):
-        print(f"-> Loading fine-tuned LoRA adapter from {LORA_PATH}...")
-        model = PeftModel.from_pretrained(base, LORA_PATH)
-    else:
-        print("-> Notice: No fine-tuned LoRA found. Running base model.")
-        model = base
+    if args.use_lora and os.path.exists(LORA_PATH):
+        print(f"-> Attaching custom LoRA adapter from {LORA_PATH}...")
+        model = PeftModel.from_pretrained(model, LORA_PATH)
 
     model.eval()
     
     print("\n" + "=" * 60)
-    print("  FirstLLM Chatbot Ready! (Type 'quit' or 'exit' to stop)")
+    print("  FirstLLM Instruct Chatbot Ready! (Type 'quit' to exit)")
     print("=" * 60 + "\n")
+
+    messages = [
+        {"role": "system", "content": "You are a helpful, intelligent AI assistant created by Aotlover9."}
+    ]
 
     while True:
         try:
@@ -42,37 +49,30 @@ def main():
             if user_input.lower() in ["quit", "exit", "q"]:
                 print("Exiting chat. Bye!")
                 break
-                
-            prompt = f"<|im_start|>user\n{user_input}<|im_end|>\n<|im_start|>assistant\n"
-            inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
+            messages.append({"role": "user", "content": user_input})
             
-            im_end_id = tokenizer.convert_tokens_to_ids("<|im_end|>")
-            eos_ids = [tokenizer.eos_token_id]
-            if im_end_id is not None:
-                eos_ids.append(im_end_id)
-                
+            # Apply standard ChatML template
+            prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
             with torch.no_grad():
-                output_tokens = model.generate(
+                outputs = model.generate(
                     **inputs,
-                    max_new_tokens=150,
-                    temperature=0.7,
+                    max_new_tokens=250,
+                    temperature=0.6,
                     top_p=0.9,
                     do_sample=True,
-                    pad_token_id=tokenizer.eos_token_id,
-                    eos_token_id=eos_ids
+                    pad_token_id=tokenizer.eos_token_id
                 )
-                
-            full_response = tokenizer.decode(output_tokens[0], skip_special_tokens=False)
-            
-            # Extract assistant response and cleanly cut off at <|im_end|>
-            if "<|im_start|>assistant\n" in full_response:
-                reply = full_response.split("<|im_start|>assistant\n")[-1]
-                reply = reply.split("<|im_end|>")[0].strip()
-            else:
-                reply = full_response[len(prompt):].split("<|im_end|>")[0].strip()
-                
+
+            # Slice only new generated tokens
+            generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
+            reply = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
+
             print(f"Bot: {reply}\n")
-            
+            messages.append({"role": "assistant", "content": reply})
+
         except KeyboardInterrupt:
             print("\nExiting chat. Bye!")
             break
