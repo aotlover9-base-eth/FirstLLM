@@ -1,4 +1,5 @@
 import os
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import argparse
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -11,7 +12,7 @@ MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
 OUTPUT_DIR = "checkpoints/qwen_math_lora"
 
 class MathInstructDataset(Dataset):
-    def __init__(self, data_samples, tokenizer, max_length=512):
+    def __init__(self, data_samples, tokenizer, max_length=384):
         self.items = []
         print(f"Tokenizing {len(data_samples):,} math problems with ChatML formatting...")
         
@@ -48,8 +49,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Fine-tune 1.5B Model on Internet Math Dataset")
     parser.add_argument("--model_id", type=str, default=MODEL_ID, help="Base model Hugging Face ID")
     parser.add_argument("--max_samples", type=int, default=3000, help="Number of math samples to stream")
-    parser.add_argument("--batch_size", type=int, default=4, help="Batch size per forward pass")
-    parser.add_argument("--grad_accum", type=int, default=4, help="Gradient accumulation steps (effective batch: batch_size * grad_accum)")
+    parser.add_argument("--batch_size", type=int, default=2, help="Batch size per forward pass")
+    parser.add_argument("--grad_accum", type=int, default=8, help="Gradient accumulation steps (effective batch: batch_size * grad_accum)")
     parser.add_argument("--learning_rate", type=float, default=2e-4, help="Learning rate for LoRA")
     parser.add_argument("--epochs", type=int, default=1, help="Number of training epochs")
     return parser.parse_args()
@@ -60,6 +61,7 @@ def main():
     print(f"-> Fine-tuning device: {device}")
     
     if device == "cuda":
+        torch.cuda.empty_cache()
         print(f"-> GPU: {torch.cuda.get_device_name(0)}")
         print(f"-> Total VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
 
@@ -90,6 +92,10 @@ def main():
         torch_dtype=dtype,
         device_map=device
     )
+
+    # Enable Gradient Checkpointing (Reduces VRAM usage by ~60%!)
+    base_model.gradient_checkpointing_enable()
+    base_model.enable_input_require_grads()
 
     # 3. Setup LoRA
     print("-> Setting up LoRA adapters for 1.5B architecture...")
