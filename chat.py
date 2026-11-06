@@ -1,4 +1,5 @@
 import os
+import time
 import argparse
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -6,6 +7,21 @@ from peft import PeftModel
 
 DEFAULT_MODEL = "HuggingFaceTB/SmolLM2-135M-Instruct"
 LORA_PATH = "checkpoints/chat_lora"
+CHAT_LOG_FILE = "chat_history.md"
+
+def log_chat_turn(user_msg, bot_msg):
+    """Appends each conversation turn into a Markdown file for GitHub."""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    file_exists = os.path.exists(CHAT_LOG_FILE)
+    
+    with open(CHAT_LOG_FILE, "a", encoding="utf-8") as f:
+        if not file_exists:
+            f.write("# FirstLLM Chat History\n\nRecorded interactive sessions with the trained model.\n\n")
+            
+        f.write(f"### Turn [{timestamp}]\n\n")
+        f.write(f"**You:** {user_msg}\n\n")
+        f.write(f"**Bot:** {bot_msg}\n\n")
+        f.write("---\n\n")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Chat with FirstLLM")
@@ -35,6 +51,7 @@ def main():
     
     print("\n" + "=" * 60)
     print("  FirstLLM Instruct Chatbot Ready! (Type 'quit' to exit)")
+    print(f"  All conversations will be saved to: {CHAT_LOG_FILE}")
     print("=" * 60 + "\n")
 
     messages = [
@@ -47,7 +64,7 @@ def main():
             if not user_input:
                 continue
             if user_input.lower() in ["quit", "exit", "q"]:
-                print("Exiting chat. Bye!")
+                print(f"\nExiting chat. History recorded in '{CHAT_LOG_FILE}'!")
                 break
 
             messages.append({"role": "user", "content": user_input})
@@ -72,10 +89,14 @@ def main():
 
             print(f"Bot: {reply}\n")
             messages.append({"role": "assistant", "content": reply})
+            
+            # Auto-record this turn to file
+            log_chat_turn(user_input, reply)
 
         except KeyboardInterrupt:
-            print("\nExiting chat. Bye!")
+            print(f"\n\nExiting chat. History recorded in '{CHAT_LOG_FILE}'!")
             break
 
 if __name__ == "__main__":
     main()
+
