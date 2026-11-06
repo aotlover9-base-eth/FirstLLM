@@ -8,11 +8,13 @@ env/
 venv/
 .venv/
 
-# Model checkpoints and weights
-*.pt
+# Model checkpoints and weights (allow best_model.pt)
 *.pth
 *.bin
-checkpoints/
+
+# Allow tracking best model checkpoint (< 20MB)
+!checkpoints/best_model.pt
+
 
 # Data cache
 data/
