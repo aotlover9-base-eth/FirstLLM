@@ -46,6 +46,11 @@ def main():
             prompt = f"<|im_start|>user\n{user_input}<|im_end|>\n<|im_start|>assistant\n"
             inputs = tokenizer(prompt, return_tensors="pt").to(device)
             
+            im_end_id = tokenizer.convert_tokens_to_ids("<|im_end|>")
+            eos_ids = [tokenizer.eos_token_id]
+            if im_end_id is not None:
+                eos_ids.append(im_end_id)
+                
             with torch.no_grad():
                 output_tokens = model.generate(
                     **inputs,
@@ -53,17 +58,18 @@ def main():
                     temperature=0.7,
                     top_p=0.9,
                     do_sample=True,
-                    pad_token_id=tokenizer.eos_token_id
+                    pad_token_id=tokenizer.eos_token_id,
+                    eos_token_id=eos_ids
                 )
                 
             full_response = tokenizer.decode(output_tokens[0], skip_special_tokens=False)
             
-            # Extract assistant response
+            # Extract assistant response and cleanly cut off at <|im_end|>
             if "<|im_start|>assistant\n" in full_response:
                 reply = full_response.split("<|im_start|>assistant\n")[-1]
-                reply = reply.replace("<|im_end|>", "").strip()
+                reply = reply.split("<|im_end|>")[0].strip()
             else:
-                reply = full_response[len(prompt):].strip()
+                reply = full_response[len(prompt):].split("<|im_end|>")[0].strip()
                 
             print(f"Bot: {reply}\n")
             
