@@ -64,12 +64,25 @@ A comprehensive, hands-on repository demonstrating how to build, pre-train, fine
 
 ---
 
-## How to Run & Reproduce
+## Quickstart: Clone & Setup
 
-### 1. Install Dependencies
+Since this repository is public, anyone can clone and run it directly without authentication:
+
 ```bash
+git clone https://github.com/aotlover9-base-eth/FirstLLM.git
+cd FirstLLM
 pip install -r requirements.txt
 ```
+
+> [!TIP]
+> **RTX 50-Series (Blackwell, sm_120) Users:** If running on an RTX 5070, 5080, or 5090, install PyTorch with CUDA 12.8+ support to avoid `no kernel image is available` errors:
+> ```bash
+> pip install --upgrade --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128
+> ```
+
+---
+
+## How to Run & Reproduce
 
 ### 2. Train Mini-GPT from Scratch (GPU/CPU)
 ```bash
