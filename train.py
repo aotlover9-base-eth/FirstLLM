@@ -11,7 +11,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
     parser.add_argument("--block_size", type=int, default=128, help="Context sequence length")
     parser.add_argument("--n_embd", type=int, default=256, help="Embedding dimension")
-    parser.add_argument("--n_head", type=int, default=6, help="Number of attention heads")
+    parser.add_argument("--n_head", type=int, default=4, help="Number of attention heads")
     parser.add_argument("--n_layer", type=int, default=6, help="Number of transformer layers")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout probability")
     parser.add_argument("--learning_rate", type=float, default=3e-4, help="Peak learning rate")
