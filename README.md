@@ -76,11 +76,30 @@ cd FirstLLM
 pip install -r requirements.txt
 ```
 
-> [!TIP]
-> **RTX 50-Series (Blackwell, sm_120) Users:** If running on an RTX 5070, 5080, or 5090, install PyTorch with CUDA 12.8+ support to avoid `no kernel image is available` errors:
-> ```bash
-> pip install --upgrade --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128
-> ```
+---
+
+## 🖥️ GPU Compatibility & Setup Guide (RTX 30 / 40 / 50 Series)
+
+This codebase is tested and optimized to run out-of-the-box across all modern NVIDIA GPU generations:
+
+| GPU Family | Architecture | Supported Models | Recommended PyTorch Command |
+| :--- | :--- | :--- | :--- |
+| **RTX 30-Series** | Ampere (`sm_86`) | 3060, 3070, 3080, 3090, A4000 | `pip install torch --index-url https://download.pytorch.org/whl/cu124` |
+| **RTX 40-Series** | Ada Lovelace (`sm_89`) | 4060, 4070, 4080, 4090, 4060 Ti | `pip install torch --index-url https://download.pytorch.org/whl/cu124` |
+| **RTX 50-Series** | Blackwell (`sm_120`) | 5070, 5070 Ti, 5080, 5090 | `pip install --upgrade --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128` |
+
+### 1-Click GPU Commands:
+
+* **For RTX 30-Series & 40-Series Cards:**
+  ```bash
+  pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+  ```
+
+* **For RTX 50-Series (Blackwell) Cards:**
+  *(Required to prevent `CUDA error: no kernel image is available for execution on the device` on newer `sm_120` silicon)*
+  ```bash
+  pip install --upgrade --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128
+  ```
 
 ---
 
