@@ -16,6 +16,8 @@ venv/
 !checkpoints/best_model.pt
 !checkpoints/chat_lora/
 !checkpoints/chat_lora/**
+!checkpoints/qwen_math_lora/
+!checkpoints/qwen_math_lora/**
 
 
 # Data cache

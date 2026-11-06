@@ -5,8 +5,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-DEFAULT_MODEL = "HuggingFaceTB/SmolLM2-135M-Instruct"
-LORA_PATH = "checkpoints/chat_lora"
+DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct" if os.path.exists("checkpoints/qwen_math_lora") else "HuggingFaceTB/SmolLM2-135M-Instruct"
+MATH_LORA = "checkpoints/qwen_math_lora"
+CHAT_LORA = "checkpoints/chat_lora"
 CHAT_LOG_FILE = "chat_history.md"
 
 def log_chat_turn(user_msg, bot_msg):
@@ -26,7 +27,7 @@ def log_chat_turn(user_msg, bot_msg):
 def parse_args():
     parser = argparse.ArgumentParser(description="Chat with FirstLLM")
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="Model ID")
-    parser.add_argument("--use_lora", action="store_true", help="Attach custom LoRA adapter")
+    parser.add_argument("--lora", type=str, default="auto", help="Path to LoRA adapter or 'none'")
     return parser.parse_args()
 
 def main():
@@ -43,9 +44,19 @@ def main():
         device_map=device
     )
 
-    if args.use_lora and os.path.exists(LORA_PATH):
-        print(f"-> Attaching custom LoRA adapter from {LORA_PATH}...")
-        model = PeftModel.from_pretrained(model, LORA_PATH)
+    # Auto-detect LoRA adapter
+    lora_path = None
+    if args.lora == "auto":
+        if "Qwen" in args.model and os.path.exists(MATH_LORA):
+            lora_path = MATH_LORA
+        elif os.path.exists(CHAT_LORA):
+            lora_path = CHAT_LORA
+    elif args.lora != "none" and os.path.exists(args.lora):
+        lora_path = args.lora
+
+    if lora_path:
+        print(f"-> Attaching fine-tuned LoRA adapter from {lora_path}...")
+        model = PeftModel.from_pretrained(model, lora_path)
 
     model.eval()
     
