@@ -12,8 +12,10 @@ venv/
 *.pth
 *.bin
 
-# Allow tracking best model checkpoint (< 20MB)
+# Allow tracking best model checkpoint & LoRA adapters (< 30MB)
 !checkpoints/best_model.pt
+!checkpoints/chat_lora/
+!checkpoints/chat_lora/**
 
 
 # Data cache
