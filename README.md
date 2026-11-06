@@ -1,3 +1,5 @@
+![FirstLLM Banner](assets/firstllm_github_banner.png)
+
 # FirstLLM
 
 > ### ⚡ Total Project Spend: **\$0.22 USD**
@@ -20,13 +22,23 @@ A comprehensive, hands-on repository demonstrating how to build, pre-train, fine
 
 ## Project Milestones
 
-```
-[Phase 1: Scratch Mini-GPT]       -> [Phase 2: LoRA Instruction Tuning] -> [Phase 3: 1.5B Math Scaling]
-- 4.79M parameters                    - SmolLM2-135M Base                     - Qwen2.5-1.5B-Instruct
-- Character-level Transformer         - Custom Creator Identity & Q&A         - Hugging Face 'meta-math/MetaMathQA'
-- Trained in 2.79 mins (Loss: 1.56)   - LoRA (PEFT) in 45 seconds             - Gradient Checkpointing (5 GB VRAM)
-- Generates Shakespearean verse       - Interactive Terminal Chat             - Tested on JEE Advanced Calculus
-```
+### Phase 1: Scratch Mini-GPT (Pre-training)
+* **Model Scale:** 4.79M parameters (Decoder-only Transformer built from scratch).
+* **Dataset:** Tiny Shakespeare (1.11M characters, character-level tokenization).
+* **Training Speed:** 2.79 minutes on an RTX 5070 (Loss dropped from 4.21 to 1.56).
+* **Output:** Learned English vocabulary, word boundaries, dialogue format, and authentic Shakespearean verse.
+
+### Phase 2: Instruction Fine-Tuning & Identity (LoRA)
+* **Base Model:** SmolLM2-135M Base.
+* **Method:** Parameter-Efficient Fine-Tuning (LoRA) with target projections.
+* **Training Speed:** 45 seconds on an RTX 5070 (Loss dropped from 2.23 to 0.25).
+* **Output:** Conversational ChatML alignment, creator identity awareness (Aotlover9), and interactive terminal chat loop with automated session logging.
+
+### Phase 3: 1.5B Scaling & Math Reasoning (MetaMathQA)
+* **Model Scale:** Qwen 2.5 (1.5B-Instruct).
+* **Dataset:** Streamed directly from Hugging Face (`meta-math/MetaMathQA`, 3,000+ step-by-step problems).
+* **VRAM Efficiency:** Gradient Checkpointing + Batch Size 2 (Accumulation 8) kept peak VRAM under 5.5 GB.
+* **Output:** Multi-step mathematical reasoning and calculus evaluation tested on JEE Advanced problems.
 
 ---
 
