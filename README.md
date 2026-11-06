@@ -10,7 +10,7 @@ A comprehensive, hands-on repository demonstrating how to build, pre-train, fine
 ## 💰 Total Cost & Hardware Profile
 
 > ### **Grand Total Spent: \$0.22 USD**
-> Every experiment in this repository—building and pre-training a Transformer from scratch, instruction fine-tuning, and scaling to a 1.5 Billion parameter model on an RTX 5070—was executed for a **total cost of \$0.22**.
+> Every experiment in this repository, including building and pre-training a Transformer from scratch, instruction fine-tuning, and scaling to a 1.5 Billion parameter model on an RTX 5070, was executed for a **total cost of \$0.22**.
 
 * **Total Cost:** **\$0.22 USD** (All training, fine-tuning & evaluation runs)
 * **Compute Provider:** OctaSpace (Decentralized Cloud)
