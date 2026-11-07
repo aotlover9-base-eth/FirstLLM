@@ -157,7 +157,8 @@ def main():
             loss = outputs.loss / args.grad_accum
             loss.backward()
 
-            accum_loss += loss.item() * args.grad_accum
+            step_loss = loss.item() * args.grad_accum
+            accum_loss += step_loss
 
             if (i + 1) % args.grad_accum == 0 or (i + 1) == len(dataloader):
                 torch.nn.utils.clip_grad_norm_(trainable_params, max_norm=1.0)
@@ -166,6 +167,8 @@ def main():
                 global_step += 1
                 pbar.set_postfix({"step": global_step, "loss": f"{accum_loss / args.grad_accum:.4f}"})
                 accum_loss = 0.0
+            elif (i + 1) % 2 == 0:
+                pbar.set_postfix({"loss": f"{step_loss:.4f}"})
 
     print("-" * 65)
     print(f"-> Saving R1 reasoning LoRA weights to {OUTPUT_DIR}...")
