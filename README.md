@@ -42,6 +42,12 @@ A hands-on repository demonstrating how to build, pre-train, fine-tune, and scal
 * Gradient checkpointing enabled to maintain peak VRAM under 5.5 GB.
 * Multi-step chain-of-thought derivations evaluated on JEE Advanced calculus.
 
+### Phase 4: DeepSeek-R1 Style Reasoning
+* Base model: Qwen 2.5 1.5B Instruct.
+* Trained on OpenR1-Math-220k with explicit `<think>` reasoning traces.
+* Model analyzes boundary conditions and self-verifies steps before writing final answers.
+* Interactive terminal renders thoughts in real-time before displaying the solution.
+
 ---
 
 ## 🚀 Quickstart
@@ -85,6 +91,11 @@ python3 generate.py --prompt "ROMEO:\n"
 python3 train_1b_math.py --max_samples 3000
 ```
 
+### Train DeepSeek-R1 Style Reasoning Model
+```bash
+python3 train_r1_reasoning.py --max_samples 3000
+```
+
 ### Interactive Chat
 ```bash
 python3 chat.py --model Qwen/Qwen2.5-1.5B-Instruct
@@ -102,7 +113,8 @@ FirstLLM/
 ├── checkpoints/
 │   ├── best_model.pt          # Scratch Mini-GPT weights
 │   ├── chat_lora/             # SmolLM2 135M LoRA adapter
-│   └── qwen_math_lora/        # Qwen 1.5B Math LoRA adapter
+│   ├── qwen_math_lora/        # Qwen 1.5B Math LoRA adapter
+│   └── r1_reasoning_lora/     # DeepSeek-R1 reasoning LoRA adapter
 ├── examples/
 │   └── sample_chat_transcript.md # Recorded testing transcript
 ├── data.py                    # Tokenizer & data preparation
@@ -111,6 +123,7 @@ FirstLLM/
 ├── generate.py                # Sampling and generation script
 ├── finetune_chat.py           # LoRA instruction fine-tuning
 ├── train_1b_math.py           # 1.5B scaling with MetaMathQA
+├── train_r1_reasoning.py      # DeepSeek-R1 reasoning fine-tuning
 ├── chat.py                    # Interactive terminal chatbot
 └── requirements.txt           # Python dependencies
 ```

@@ -18,6 +18,8 @@ venv/
 !checkpoints/chat_lora/**
 !checkpoints/qwen_math_lora/
 !checkpoints/qwen_math_lora/**
+!checkpoints/r1_reasoning_lora/
+!checkpoints/r1_reasoning_lora/**
 
 
 # User local chat logs

@@ -5,7 +5,8 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct" if os.path.exists("checkpoints/qwen_math_lora") else "HuggingFaceTB/SmolLM2-135M-Instruct"
+DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct" if (os.path.exists("checkpoints/r1_reasoning_lora") or os.path.exists("checkpoints/qwen_math_lora")) else "HuggingFaceTB/SmolLM2-135M-Instruct"
+REASONING_LORA = "checkpoints/r1_reasoning_lora"
 MATH_LORA = "checkpoints/qwen_math_lora"
 CHAT_LORA = "checkpoints/chat_lora"
 CHAT_LOG_FILE = "chat_history.md"
@@ -28,6 +29,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Chat with FirstLLM")
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="Model ID")
     parser.add_argument("--lora", type=str, default="auto", help="Path to LoRA adapter or 'none'")
+    parser.add_argument("--max_tokens", type=int, default=650, help="Max tokens to generate")
     return parser.parse_args()
 
 def main():
@@ -47,7 +49,9 @@ def main():
     # Auto-detect LoRA adapter
     lora_path = None
     if args.lora == "auto":
-        if "Qwen" in args.model and os.path.exists(MATH_LORA):
+        if os.path.exists(REASONING_LORA):
+            lora_path = REASONING_LORA
+        elif "Qwen" in args.model and os.path.exists(MATH_LORA):
             lora_path = MATH_LORA
         elif os.path.exists(CHAT_LORA):
             lora_path = CHAT_LORA
@@ -87,7 +91,7 @@ def main():
             with torch.no_grad():
                 outputs = model.generate(
                     **inputs,
-                    max_new_tokens=250,
+                    max_new_tokens=args.max_tokens,
                     temperature=0.6,
                     top_p=0.9,
                     do_sample=True,
@@ -98,7 +102,20 @@ def main():
             generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
             reply = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
 
-            print(f"Bot: {reply}\n")
+            # Clean display for DeepSeek-R1 <think> reasoning traces
+            if "<think>" in reply and "</think>" in reply:
+                parts = reply.split("</think>", 1)
+                think_block = parts[0].replace("<think>", "").strip()
+                final_answer = parts[1].strip()
+
+                print("\n🧠 Thinking Process:")
+                print("┌" + "─" * 60)
+                for line in think_block.split("\n"):
+                    print(f"│ {line}")
+                print("└" + "─" * 60)
+                print(f"\n💡 Answer:\n{final_answer}\n")
+            else:
+                print(f"Bot: {reply}\n")
             messages.append({"role": "assistant", "content": reply})
             
             # Auto-record this turn to file
