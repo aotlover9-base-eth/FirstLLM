@@ -89,14 +89,8 @@ def main():
     dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     base_model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
-        torch_dtype=dtype,
-        device_map=device
-    )
-
-    # Enable modern non-reentrant Gradient Checkpointing
-    base_model.config.use_cache = False
-    base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
-    base_model.enable_input_require_grads()
+        torch_dtype=dtype
+    ).to(device)
 
     # 3. Setup LoRA
     print("-> Setting up LoRA adapters for 1.5B architecture...")
@@ -140,7 +134,7 @@ def main():
             accum_loss += loss.item() * args.grad_accum
 
             if (i + 1) % args.grad_accum == 0 or (i + 1) == len(dataloader):
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(trainable_params, max_norm=1.0)
                 optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
