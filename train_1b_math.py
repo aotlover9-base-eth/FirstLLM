@@ -93,8 +93,9 @@ def main():
         device_map=device
     )
 
-    # Enable Gradient Checkpointing (Reduces VRAM usage by ~60%!)
-    base_model.gradient_checkpointing_enable()
+    # Enable modern non-reentrant Gradient Checkpointing
+    base_model.config.use_cache = False
+    base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     base_model.enable_input_require_grads()
 
     # 3. Setup LoRA
@@ -114,7 +115,8 @@ def main():
     dataset = MathInstructDataset(samples, tokenizer)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=0.01)
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(trainable_params, lr=args.learning_rate, weight_decay=0.01)
 
     print(f"\nStarting 1.5B Math Fine-Tuning ({args.epochs} epoch, effective batch {args.batch_size * args.grad_accum})...")
     print("-" * 65)

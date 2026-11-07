@@ -12,7 +12,7 @@ MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
 OUTPUT_DIR = "checkpoints/r1_reasoning_lora"
 
 class R1ReasoningDataset(Dataset):
-    def __init__(self, data_samples, tokenizer, max_length=512):
+    def __init__(self, data_samples, tokenizer, max_length=384):
         self.items = []
         print(f"Tokenizing {len(data_samples):,} R1 reasoning samples with <think> traces...")
 
@@ -65,8 +65,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Fine-tune 1.5B Model with DeepSeek-R1 <think> Reasoning")
     parser.add_argument("--model_id", type=str, default=MODEL_ID, help="Base model ID")
     parser.add_argument("--max_samples", type=int, default=3000, help="Number of reasoning samples to stream")
-    parser.add_argument("--batch_size", type=int, default=2, help="Batch size per forward pass")
-    parser.add_argument("--grad_accum", type=int, default=8, help="Gradient accumulation steps")
+    parser.add_argument("--batch_size", type=int, default=1, help="Batch size per forward pass")
+    parser.add_argument("--grad_accum", type=int, default=16, help="Gradient accumulation steps")
     parser.add_argument("--learning_rate", type=float, default=2e-4, help="Learning rate for LoRA")
     parser.add_argument("--epochs", type=int, default=1, help="Number of training epochs")
     return parser.parse_args()
@@ -118,8 +118,9 @@ def main():
         device_map=device
     )
 
-    # Enable Gradient Checkpointing for memory efficiency
-    base_model.gradient_checkpointing_enable()
+    # Disable cache and enable modern non-reentrant gradient checkpointing
+    base_model.config.use_cache = False
+    base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     base_model.enable_input_require_grads()
 
     # 3. Setup LoRA
@@ -139,7 +140,9 @@ def main():
     dataset = R1ReasoningDataset(samples, tokenizer)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=0.01)
+    # Only pass trainable parameters to AdamW optimizer
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(trainable_params, lr=args.learning_rate, weight_decay=0.01)
 
     print(f"\nStarting R1 Reasoning Fine-Tuning ({args.epochs} epoch, effective batch {args.batch_size * args.grad_accum})...")
     print("-" * 65)
